@@ -1,6 +1,6 @@
 local redis = require "resty.iredis"
 
-local red = redis:new({["ip"]="127.0.0.1", ["port"]=6379})
+local red = redis:new({["ip"]="10.0.61.51", ["port"]=6379})
 
 local _M = {}
 

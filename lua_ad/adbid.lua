@@ -20,8 +20,8 @@ function bid()
         return
     end
 
-    --ngx.log(ngx.INFO, req_body)
-    ngx.ctx.req_body = req_body
+    ngx.log(ngx.INFO, req_body)
+    --ngx.ctx.req_body = req_body
 
     ad_cache.cache()
 
@@ -60,8 +60,8 @@ function bid()
     end
 
     local resp = cjson.encode(result)
-    --ngx.log(ngx.INFO, resp)
-    ngx.ctx.resp = resp
+    ngx.log(ngx.INFO, resp)
+    --ngx.ctx.resp = resp
 
     ngx.say(resp)
 end

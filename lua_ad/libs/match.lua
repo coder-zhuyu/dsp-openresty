@@ -237,11 +237,16 @@ function _M.match(data)
     local res = redis.mget_from_redis({"imei:" .. device_id, 'ip:' .. data['device']['ip']})
     --ngx.log(ngx.INFO, cjson.encode(res))
 
-    local city_code = res[2]
-    local labels = res[1]
+    local labels = nil
+    local city_code = nil
+
+    if res then
+        city_code = res[2]
+        labels = res[1]
+    end
 
     --local labels = match_imei(data)
-    if not labels or type(labels) ~= 'string' then
+    if not labels or labels == ngx.null then
         ngx.log(ngx.INFO, 'imei号未匹配')
         return nil
     else

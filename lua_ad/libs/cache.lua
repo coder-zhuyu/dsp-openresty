@@ -45,12 +45,13 @@ function _M.cache()
     db:set_timeout(1000) -- 1 sec
 
     local ok, err, errno, sqlstate = db:connect{
-        host = "127.0.0.1",
+        host = "10.0.61.51",
         port = 3306,
         database = "adview",
         user = "root",
         password = "123456",
-        max_packet_size = 1024 * 1024 }
+        max_packet_size = 1024 * 1024 
+    }
 
     if not ok then
         ngx.log(ngx.ERR, "failed to connect: " .. err .. ": " .. errno .. " " .. sqlstate)
