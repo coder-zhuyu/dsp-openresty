@@ -1,10 +1,9 @@
 local redis = require "resty.iredis"
 
-local red = redis:new({["ip"]="10.0.61.51", ["port"]=6379})
-
 local _M = {}
 
 function _M.get_from_redis(key)
+    local red = redis:new({["ip"]="10.0.61.51", ["port"]=6379})
     local res, err = red:get(key)
     if res then
         return res
@@ -14,6 +13,7 @@ function _M.get_from_redis(key)
 end
 
 function _M.mget_from_redis(args)
+    local red = redis:new({["ip"]="10.0.61.51", ["port"]=6379})
     local res, err = red:mget(unpack(args))
     if res then
         return res
