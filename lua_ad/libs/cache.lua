@@ -6,15 +6,8 @@ local comm = require("libs.common")
 
 local _M = {}
 
-function _M.cache()
-    local cache_ad = ngx.shared.cache_ad
-    ad = cache_ad:get("ad")
 
-    --未过期
-    if ad then
-        return
-    end
-
+local function cache_mysql(cache_ad)
     ngx.log(ngx.INFO, "缓存mysql数据到共享内存")
 
     --当前时间
@@ -45,11 +38,11 @@ function _M.cache()
     db:set_timeout(1000) -- 1 sec
 
     local ok, err, errno, sqlstate = db:connect{
-        host = "10.0.61.51",
+        host = "127.0.0.1",
         port = 3306,
         database = "adview",
         user = "root",
-        password = "123456",
+        password = "111111",
         max_packet_size = 1024 * 1024 
     }
 
@@ -127,5 +120,24 @@ function _M.cache()
     end
 
 end
+
+
+function _M.cache()
+    local cache_ad = ngx.shared.cache_ad
+    local ad = cache_ad:get("ad")
+
+    --未过期
+    if ad then
+        return
+    end
+   
+    --缓存加锁
+    local lock = require "resty.lock"
+    local lock = lock:new("locks_ad")
+    lock:lock("lock_ad")
+    cache_mysql(cache_ad)
+    lock:unlock()
+end
+
 
 return _M

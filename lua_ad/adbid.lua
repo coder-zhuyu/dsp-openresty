@@ -6,7 +6,7 @@ local match = require("libs.match")
 local bider = require("libs.bid")
 local pack = require("libs.pack")
 
-function bid()
+local function bid()
     --取报文
     ngx.req.read_body()
     local req_body = ngx.req.get_body_data()
@@ -20,7 +20,7 @@ function bid()
         return
     end
 
-    ngx.log(ngx.INFO, req_body)
+    --ngx.log(ngx.INFO, req_body)
     --ngx.ctx.req_body = req_body
 
     ad_cache.cache()
@@ -41,7 +41,7 @@ function bid()
     end
     --ngx.say(cjson.encode(match_list))
 
-    bid_price, stageid, result, paymode = bider.bid(req_body_json['imp'][1]['bidfloor'], match_list)
+    local bid_price, stageid, result, paymode = bider.bid(req_body_json['imp'][1]['bidfloor'], match_list)
     if not result then
         local result = {}
         result['id'] = req_body_json.id
@@ -60,10 +60,10 @@ function bid()
     end
 
     local resp = cjson.encode(result)
-    ngx.log(ngx.INFO, resp)
+    --ngx.log(ngx.INFO, resp)
     --ngx.ctx.resp = resp
 
-    ngx.say(resp)
+    ngx.print(resp)
 end
 
 bid()
