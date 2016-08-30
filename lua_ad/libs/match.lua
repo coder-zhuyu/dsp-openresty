@@ -3,6 +3,7 @@
 local cjson = require("cjson")
 local comm = require("libs.common")
 local redis = require("libs.redis")
+local lru = require("libs.cache")
 
 local _M = {}
 
@@ -185,16 +186,13 @@ function _M.match(data)
     end
 
     --获取所有候选的广告 创意
-    local cache_ad = ngx.shared.cache_ad
-    local orig_ad_stage = cache_ad:get("ad")
+    local orig_ad_stage_json = lru.get_ad()
     --ngx.say(orig_ad_stage)
     
-    if not orig_ad_stage then
+    if not orig_ad_stage_json then
         ngx.log(ngx.INFO, '没有候选广告可选择')
         return nil
     end
-
-    local orig_ad_stage_json = cjson.decode(orig_ad_stage)
 
     if comm.table_is_empty(orig_ad_stage_json) then
         ngx.log(ngx.INFO, '没有候选广告可选择')

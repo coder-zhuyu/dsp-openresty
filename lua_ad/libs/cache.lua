@@ -3,11 +3,16 @@
 local mysql = require("resty.mysql")
 local cjson = require("cjson")
 local comm = require("libs.common")
+local lrucache = require("resty.lrucache")
 
 local _M = {}
 
+-- we need to initialize the cache on the lua module level so that
+-- it can be shared by all the requests served by each nginx worker process
+local lru_cache = lrucache.new(10)
 
-local function cache_mysql(cache_ad)
+
+local function cache_mysql()
     ngx.log(ngx.INFO, "缓存mysql数据到共享内存")
 
     --当前时间
@@ -77,7 +82,7 @@ local function cache_mysql(cache_ad)
     local orig_ad_stage = {}
 
     for _, v in ipairs(res_stage) do
-        ngx.say(v.originalityId)
+        ngx.log(ngx.ERR, '缓存广告创意: ' .. v.originalityId)
         local res_orig, err, errno, sqlstate =
             db:query("select * from orig where originalityId = '" .. v.originalityId .. "'")
 
@@ -110,7 +115,7 @@ local function cache_mysql(cache_ad)
     end
 
     if not comm.table_is_empty(orig_ad_stage) then
-        cache_ad:set("ad", cjson.encode(orig_ad_stage), 1800)
+        lru_cache:set("ad", orig_ad_stage, 1800)
     end
 
     local ok, err = db:set_keepalive(60000, 100)
@@ -123,8 +128,7 @@ end
 
 
 function _M.cache()
-    local cache_ad = ngx.shared.cache_ad
-    local ad = cache_ad:get("ad")
+    local ad = lru_cache:get("ad")
 
     --未过期
     if ad then
@@ -135,8 +139,20 @@ function _M.cache()
     local lock = require "resty.lock"
     local lock = lock:new("locks_ad")
     lock:lock("lock_ad")
-    cache_mysql(cache_ad)
+    ad = lru_cache:get("ad")
+    if ad then
+        lock:unlock()
+        return
+    end
+    cache_mysql()
     lock:unlock()
+end
+
+
+function _M.get_ad()
+    local ad = lru_cache:get("ad")
+
+    return ad
 end
 
 
