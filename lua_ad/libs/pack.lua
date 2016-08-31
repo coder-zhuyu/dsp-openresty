@@ -33,8 +33,11 @@ function _M.pack(data, bid_price, stageid, result, paymode)
     bid_dict['nurl'] = nurl
 
     --{"600x600": "http://click.bangzhumai.com/static/picture/ymjy-cp-600-600.jpg"}
-    local m, err = ngx.re.match(bid_imp_orig.pic_images, '.*"(.*)".*:.*"(.*)"')
-    local img_url = m[2]
+    --local m, err = ngx.re.match(bid_imp_orig.pic_images, '.*"(.*)".*:.*"(.*)"')
+    --local img_url = m[2]
+    local s_from, _ = string.find(bid_imp_orig.pic_images, 'http')
+    local s_to, _ = string.find(bid_imp_orig.pic_images, '"}') 
+    local img_url = string.sub(bid_imp_orig.pic_images, s_from, s_to - 1)
     if bid_imp_orig.orig_type == 1 then
         bid_dict['adi'] = img_url
         bid_dict['adh'] = tonumber(bid_imp_orig.pic_h)
